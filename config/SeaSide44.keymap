@@ -89,6 +89,7 @@
                       &trans      &trans       &trans     &trans      &trans                  &trans       &trans                                              &to 0
             >;
 
+			sensor-bindings = <&msc SCRL_X &msc SCRL_Y>;
         };
     };
 };
