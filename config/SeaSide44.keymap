@@ -20,6 +20,10 @@
     quick-tap-ms = <300>;
 };
 
+&mkp_input_listener {
+    input-processors = <&zip_temp_layer MOUSE 750>;
+};
+
 / {
     combos {
 		compatible = "zmk,combos";
@@ -35,6 +39,7 @@
     //};
 
 	behaviors {
+		// QMK の quick tap と同等機能にする。
 		lt_spc: layer_tap_space {
             compatible = "zmk,behavior-hold-tap";
             label = "LAYER_TAP_SPACE";
