@@ -1,6 +1,5 @@
 #include "SeaSide44.dtsi"
 #include <input/processors.dtsi>
-#include "../../../SeaSide44.keymap"
 
 &default_transform {
     col-offset = <6>;
@@ -40,7 +39,7 @@
         device = <&trackball>;
 
 		// input processors による AML 有効化。
-		input-processors = <&zip_temp_layer MOUSE 750>;
+		input-processors = <&zip_temp_layer 3 750>;
     };
 };
 
@@ -83,8 +82,8 @@
         spi-max-frequency = <2000000>;
         irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 		// AML には input processors を使うので。
-        // automouse-layer = <MOUSE>;
-        scroll-layers = <SCROLL>;
+        // automouse-layer = <3>;
+        scroll-layers = <4>;
     };
 };
 
