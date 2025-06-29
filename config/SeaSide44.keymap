@@ -35,16 +35,6 @@
     //};
 
 	behaviors {
-        bt_hold: bt_hold {
-            compatible = "zmk,behavior-hold-tap";
-            label = "BT_HOLD";
-            #binding-cells = <2>;
-            tapping-term-ms = <200>;
-            quick-tap-ms = <0>;
-            flavor = "tap-preferred";
-            bindings = <&bt>, <&kp>;
-        };
-
 		lt_spc: layer_tap_space {
             compatible = "zmk,behavior-hold-tap";
             label = "LAYER_TAP_SPACE";
@@ -90,7 +80,7 @@
 
         MOUSE {
             bindings = <
-&kp ESC                &trans	      &trans        &trans        &trans        &trans                                           &trans      &trans       &trans      &trans         &trans            &trans
+&kp ESC                &trans	     &trans        &trans        &trans        &trans                                           &trans      &trans       &trans      &trans         &trans            &trans
 &trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB1     &mkp MB2    &mo SCROLL     &trans            &trans
 &trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB4     &mkp MB5    &trans         &trans            &trans
                                      &trans        &trans        &trans        &trans         &trans               &trans       &trans                                              &to 0
@@ -99,7 +89,7 @@
 
         SCROLL {
             bindings = <
-&kp ESC                &trans	      &trans        &trans        &trans        &trans                                           &trans      &trans       &trans      &trans         &trans            &trans
+&kp ESC                &trans	     &trans        &trans        &trans        &trans                                           &trans      &trans       &trans      &trans         &trans            &trans
 &trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB1     &mkp MB2    &mo SCROLL     &trans            &trans
 &trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB4     &mkp MB5    &trans         &trans            &trans
                                      &trans        &trans        &trans        &trans         &trans               &trans       &trans                                              &to 0
@@ -108,8 +98,8 @@
 
         CONFIG {
             bindings = <
-&ext_power EP_TOG      &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                     &trans      &trans       &trans      &trans         &trans            &trans
-&trans                 &bt BT_CLR    &trans	    &trans        &trans        &trans                                           &trans      &trans       &trans      &trans         &trans            &trans
+&kp C_SLEEP            &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                     &trans      &trans       &kp C_MUTE  &kp C_VOL_DN   &kp C_VOL_UP      &trans
+&trans                 &bt BT_CLR    &trans	       &trans        &trans        &trans                                           &trans      &trans       &trans      &trans         &trans            &trans
 &trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans      &trans         &trans            &trans
                                      &trans        &trans        &trans        &trans         &trans               &trans       &trans                                              &to 0
             >;
