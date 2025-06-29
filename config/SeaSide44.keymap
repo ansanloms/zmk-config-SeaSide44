@@ -3,6 +3,12 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 
+#define NUM 1
+#define SYMBOL 2
+#define MOUSE 3
+#define SCROLL 4
+#define CONFIG 5
+
 &mt {
     flavor = "balanced";
     quick-tap-ms = <300>;
