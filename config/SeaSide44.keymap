@@ -89,7 +89,7 @@
                       &trans      &trans       &trans     &trans      &trans                  &trans       &trans                                              &to 0
             >;
 
-			sensor-bindings = <&msc SCRL_X &msc SCRL_Y>;
+			sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &scroll_encoder>;
         };
     };
 };
