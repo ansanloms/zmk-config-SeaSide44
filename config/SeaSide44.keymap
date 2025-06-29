@@ -2,6 +2,7 @@
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
+#include <dt-bindings/zmk/ext_power.h>
 
 #define NUM 1
 #define SYMBOL 2
@@ -20,9 +21,9 @@
 };
 
 / {
-    //combos {
-	//	compatible = "zmk,combos";
-	//};
+    combos {
+		compatible = "zmk,combos";
+	};
 
     //macros {
     //    to_layer_0: to_layer_0 {
