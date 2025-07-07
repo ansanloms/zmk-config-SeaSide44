@@ -24,9 +24,11 @@
 
 	// 当該以外のキーを押下すると AML が解除される。
 	excluded-positions = <
+        12 // Ctrl
         19 // J
         20 // K
         21 // L
+        24 // Shift
         31 // M
         32 // <
     >;
