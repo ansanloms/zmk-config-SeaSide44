@@ -86,6 +86,9 @@
 		// AML には input processors を使うので。
         // automouse-layer = <3>;
         scroll-layers = <4>;
+        // 遅延削減: センサーを常時起動状態に保つ
+        force-awake;
+        force-awake-4ms-mode;
     };
 };
 
