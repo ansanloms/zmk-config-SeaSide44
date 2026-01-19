@@ -8,7 +8,6 @@ Seeed XIAO BLE nRF52840というマイコンとZMKファームウェアを使用
 <div><video controls src="https://github.com/user-attachments/assets/3d5d6f6d-1471-4f76-9b5a-f62b32a67766" muted="false"></video></div>
 素のKeyball39をSeaSide39に置き換えて無線化する様子です。手軽さが伝わると幸いです。（使用しているSeaSide39は開発中のものなので一部仕様が異なります。）
 
-
 <br>
 <br>
 
