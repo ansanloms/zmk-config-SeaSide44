@@ -1,0 +1,9 @@
+dist/
+.west/
+zmk/
+modules/
+build/
+bootloader/
+tools/
+zmk-pmw3610-driver/
+zmk-rgbled-widget/
