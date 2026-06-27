@@ -23,14 +23,18 @@
     require-prior-idle-ms = <200>;
 
     // 当該以外のキーを押下すると AML が解除される。
+    // MOUSE レイヤーで操作するキー (マウスボタン・スクロール・ジェスチャ
+    // トリガ) はここに含め、押下しても AML が解除されないようにする。
     excluded-positions = <
         12 // Ctrl
-        19 // J
-        20 // K
-        21 // L
+        19 // J  (MB1)
+        20 // K  (MB2)
+        21 // L  (mo SCROLL)
+        22 // ;  (mo DESKTOP_WIN / Mac: mo DESKTOP_MAC)
+        23 // Enter (at_win / Mac: at_mac)
         24 // Shift
-        31 // M
-        32 // <
+        31 // M  (MB4)
+        32 // <  (MB5)
     >;
 };
 
@@ -42,6 +46,45 @@
 
         // input processors による AML 有効化。
         input-processors = <&zip_temp_layer 3 750>;
+
+        // 各ジェスチャレイヤーでトラックボール移動をキーへ変換する。
+        // process-next で続く prevent_move (移動 0 倍) も適用し、
+        // キー変換だけ残してカーソル移動を打ち消す。
+
+        // DESKTOP_WIN (6): Ctrl+Win+Left/Right。
+        desktop_win {
+            layers = <6>;
+            input-processors = <&zip_desktop_win>;
+            process-next;
+        };
+        desktop_win_prevent_move {
+            layers = <6>;
+            input-processors = <&zip_xy_scaler 0 1>;
+        };
+
+        // DESKTOP_MAC (7): Ctrl+Left/Right (Mission Control)。
+        desktop_mac {
+            layers = <7>;
+            input-processors = <&zip_desktop_mac>;
+            process-next;
+        };
+        desktop_mac_prevent_move {
+            layers = <7>;
+            input-processors = <&zip_xy_scaler 0 1>;
+        };
+
+        // GWIN (8): ウィンドウ/アプリ切替 (Alt+Tab / Cmd+Tab)。
+        // 保持する修飾キーはトリガ側マクロ (at_win / at_mac) が持つため、
+        // Windows と macOS で同じ processor を共用する。
+        gwin {
+            layers = <8>;
+            input-processors = <&zip_window>;
+            process-next;
+        };
+        gwin_prevent_move {
+            layers = <8>;
+            input-processors = <&zip_xy_scaler 0 1>;
+        };
     };
 };
 
