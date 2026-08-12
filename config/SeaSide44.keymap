@@ -10,6 +10,11 @@
 #define MOUSE 3
 #define SCROLL 4
 #define CONFIG 5
+#define DESKTOP_WIN 6
+#define DESKTOP_MAC 7
+#define GWIN 8
+#define MACMODE 9
+#define MOUSE_MAC 10
 
 &mt {
     flavor = "balanced";
@@ -52,6 +57,77 @@
         };
     };
 
+    macros {
+        // ウィンドウ切替トリガ。押下中、修飾キーを保持しつつ GWIN レイヤーを
+        // 有効化する。トラックボール移動で Tab を連打しても修飾キーが押された
+        // ままになり、連続的なウィンドウ/アプリ切替サイクルが成立する。
+        // ウィンドウ切替の挙動は OS で同じ (Tab 連打) で、保持する修飾キーだけ
+        // が違う (Alt / Cmd)。そのため GWIN レイヤーは 1 枚を共用し、修飾キーの
+        // 違いだけをこの 2 つのマクロで吸収する。
+        // Windows: Alt 保持 (Alt+Tab)。
+        at_win: alt_tab_window {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            label = "ALT_TAB_WINDOW";
+            bindings = <&macro_press &kp LALT &mo GWIN>
+                     , <&macro_pause_for_release>
+                     , <&macro_release &kp LALT &mo GWIN>;
+        };
+        // macOS: Cmd (LGUI) 保持 (Cmd+Tab アプリ切替)。
+        at_mac: cmd_tab_window {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            label = "CMD_TAB_WINDOW";
+            bindings = <&macro_press &kp LGUI &mo GWIN>
+                     , <&macro_pause_for_release>
+                     , <&macro_release &kp LGUI &mo GWIN>;
+        };
+    };
+
+    // トラックボール移動をキー押下へ変換する input processor。
+    // mode=1 は X/Y を独立に閾値判定する (bindings: 右, 左, 下, 上)。
+    // 上下は &none にして左右成分だけを抽出する。X と Y が独立判定なので、
+    // 斜め (左下->右上 等) でも左右成分が tick を超えれば左右が発火する。
+    // tick は移動量の感度。大きいほど鈍い。
+
+    // Windows デスクトップ切替: Ctrl+Win+Left/Right。
+    zip_desktop_win: zip_desktop_win {
+        compatible = "zmk,input-processor-keybind";
+        #input-processor-cells = <0>;
+        bindings = <&kp LC(LG(RIGHT))>
+                 , <&kp LC(LG(LEFT))>
+                 , <&none>
+                 , <&none>;
+        mode = <1>;
+        tick = <80>;
+    };
+
+    // macOS スペース切替: Ctrl+Left/Right (Mission Control)。
+    zip_desktop_mac: zip_desktop_mac {
+        compatible = "zmk,input-processor-keybind";
+        #input-processor-cells = <0>;
+        bindings = <&kp LC(RIGHT)>
+                 , <&kp LC(LEFT)>
+                 , <&none>
+                 , <&none>;
+        mode = <1>;
+        tick = <80>;
+    };
+
+    // ウィンドウ/アプリ切替: Tab / Shift+Tab。修飾キー (Alt / Cmd) は
+    // トリガ側マクロ (at_win / at_mac) が保持するため、Windows と macOS で
+    // この processor を共用する。
+    zip_window: zip_window {
+        compatible = "zmk,input-processor-keybind";
+        #input-processor-cells = <0>;
+        bindings = <&kp TAB>
+                 , <&kp LS(TAB)>
+                 , <&none>
+                 , <&none>;
+        mode = <1>;
+        tick = <80>;
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
@@ -85,10 +161,18 @@
         };
 
         MOUSE {
+            // トラックボールジェスチャのトリガ。スクロールキー (SCROLL) の右に
+            // ポインタ系操作としてまとめている。押しながらトラックボールを
+            // 左右に転がして切り替える (SCROLL と同じ「握って転がす」操作)。
+            //   SCROLL | DESKTOP(22) | WINDOW(23)
+            //   列1 = デスクトップ/スペース切替, 列2 = ウィンドウ/アプリ切替
+            // 既定は Windows。CONFIG の &tog MACMODE で Mac モードにすると、
+            // conditional layer で MOUSE_MAC が重なり pos22/23 が Mac 用に
+            // 差し替わる (同じ物理キーを両 OS で共用)。
             bindings = <
-&kp ESC                &trans	     &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
-&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB1     &mkp MB2        &mo SCROLL     &trans            &trans
-&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB4     &mkp MB5        &trans         &trans            &trans
+&kp ESC                &trans	     &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans          &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB1     &mkp MB2        &mo SCROLL      &mo DESKTOP_WIN   &at_win
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &mkp MB4     &mkp MB5        &trans          &trans            &trans
                                      &trans        &trans        &trans        &trans             &trans           &trans       &trans                                                  &to 0
             >;
         };
@@ -103,12 +187,79 @@
         };
 
         CONFIG {
+            // pos6 = &tog MACMODE で Windows / macOS モードを切り替える。
+            // トグル状態は電源 OFF / 再起動で既定 (Windows) に戻る (ZMK 仕様)。
             bindings = <
-&kp C_AL_LOCK          &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                     &trans      &trans       &kp C_MUTE      &kp C_VOL_DN   &kp C_VOL_UP      &trans
+&kp C_AL_LOCK          &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                     &tog MACMODE &trans      &kp C_MUTE      &kp C_VOL_DN   &kp C_VOL_UP      &trans
 &trans                 &bt BT_CLR    &trans	       &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
 &trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
                                      &trans        &trans        &trans        &trans             &trans           &trans       &trans                                                  &to 0
             >;
+        };
+
+        // トラックボールジェスチャ用の momentary レイヤー。
+        // キー自体は全 &trans (下層へ透過)。トラックボール移動の変換は
+        // overlay 側の trackball_listener override が担う。
+        // ウィンドウ切替は Windows/macOS とも GWIN を共用する。
+        DESKTOP_WIN {
+            bindings = <
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+                                     &trans        &trans        &trans        &trans             &trans           &trans       &trans                                                  &trans
+            >;
+        };
+
+        DESKTOP_MAC {
+            bindings = <
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+                                     &trans        &trans        &trans        &trans             &trans           &trans       &trans                                                  &trans
+            >;
+        };
+
+        GWIN {
+            bindings = <
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+                                     &trans        &trans        &trans        &trans             &trans           &trans       &trans                                                  &trans
+            >;
+        };
+
+        // OS モードフラグ。CONFIG の &tog MACMODE で ON/OFF する。
+        // それ自体は全 &trans で何も上書きしない。MOUSE と同時に有効な
+        // ときだけ conditional layer が MOUSE_MAC を重ねる。
+        MACMODE {
+            bindings = <
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans         &trans            &trans
+                                     &trans        &trans        &trans        &trans             &trans           &trans       &trans                                                  &trans
+            >;
+        };
+
+        // MOUSE の Mac 版差分。Mac モード時に MOUSE へ重なり、pos22/23 の
+        // ジェスチャトリガだけを Mac 用へ差し替える。残りは &trans で
+        // MOUSE 側 (MB1/MB2/SCROLL 等) へ透過する。
+        MOUSE_MAC {
+            bindings = <
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans          &trans            &trans
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans          &mo DESKTOP_MAC   &at_mac
+&trans                 &trans        &trans        &trans        &trans        &trans                                           &trans      &trans       &trans          &trans          &trans            &trans
+                                     &trans        &trans        &trans        &trans             &trans           &trans       &trans                                                  &trans
+            >;
+        };
+    };
+
+    // MOUSE に居て、かつ Mac モード (MACMODE) のときだけ MOUSE_MAC を重ねる。
+    // AND 条件かつ MOUSE を含むため、他レイヤー (default 等) は影響を受けない。
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        mouse_mac {
+            if-layers = <MOUSE MACMODE>;
+            then-layer = <MOUSE_MAC>;
         };
     };
 };
